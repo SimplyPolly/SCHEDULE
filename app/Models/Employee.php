@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\EmployeeResetPassword;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -32,7 +33,9 @@ class Employee extends Authenticatable
         'password',
         'role',
         'is_active',
-        'preferences_submitted_at'
+        'preferences_submitted_at',
+        'phone',
+        'telegram',
     ];
 
     protected $hidden = [
@@ -44,6 +47,19 @@ class Employee extends Authenticatable
         'is_active' => 'boolean',
         'preferences_submitted_at' => 'datetime',
     ];
+
+    /**
+     * Отправка письма для установки / сброса пароля c кастомным текстом.
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $url = url(route('password.reset', [
+            'token' => $token,
+            'email' => $this->email,
+        ], false));
+
+        $this->notify(new EmployeeResetPassword($url));
+    }
 
     public function hasSubmittedPreferences(): bool
     {

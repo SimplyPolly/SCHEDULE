@@ -33,20 +33,23 @@
                         </div>
 
                         <div class="mb-4">
-                            <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Пароль *</label>
-                            <input type="password" name="password" id="password" 
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white @error('password') border-red-500 @enderror" 
-                                   required>
-                            @error('password')
+                            <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Телефон</label>
+                            <input type="text" name="phone" id="phone" 
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white @error('phone') border-red-500 @enderror" 
+                                   value="{{ old('phone') }}">
+                            @error('phone')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div class="mb-4">
-                            <label for="password_confirmation" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Подтверждение пароля *</label>
-                            <input type="password" name="password_confirmation" id="password_confirmation" 
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
-                                   required>
+                            <label for="telegram" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Telegram</label>
+                            <input type="text" name="telegram" id="telegram" 
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white @error('telegram') border-red-500 @enderror" 
+                                   value="{{ old('telegram') }}">
+                            @error('telegram')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <div class="mb-4">

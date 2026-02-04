@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class EmployeeController extends Controller
@@ -31,15 +33,21 @@ class EmployeeController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:employees,email',
-            'password' => 'required|min:8|confirmed',
             'role' => 'required|in:cook,waiter,hostess,bartender,admin',
             'is_active' => 'boolean',
+            'phone' => 'nullable|string|max:255',
+            'telegram' => 'nullable|string|max:255',
         ]);
 
-        $validated['password'] = Hash::make($validated['password']);
+        // Генерируем случайный пароль, чтобы админ его не знал,
+        // а сотрудник установил свой через письмо-ссылку для установки пароля
+        $validated['password'] = Hash::make(Str::random(32));
         $validated['is_active'] = $request->has('is_active');
 
-        Employee::create($validated);
+        $employee = Employee::create($validated);
+
+        // Отправляем сотруднику письмо для установки пароля
+        Password::sendResetLink(['email' => $employee->email]);
 
         return redirect()->route('admin.employees.index')
             ->with('success', 'Сотрудник успешно создан.');
@@ -64,16 +72,11 @@ class EmployeeController extends Controller
                 'email',
                 Rule::unique('employees')->ignore($employee->id),
             ],
-            'password' => 'nullable|min:8|confirmed',
             'role' => 'required|in:cook,waiter,hostess,bartender,admin',
             'is_active' => 'boolean',
+            'phone' => 'nullable|string|max:255',
+            'telegram' => 'nullable|string|max:255',
         ]);
-
-        if ($request->filled('password')) {
-            $validated['password'] = Hash::make($validated['password']);
-        } else {
-            unset($validated['password']);
-        }
 
         $validated['is_active'] = $request->has('is_active');
 
