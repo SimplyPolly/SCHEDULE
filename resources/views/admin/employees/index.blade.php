@@ -18,9 +18,9 @@
                     </div>
 
                     @if(session('success'))
-                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                            {{ session('success') }}
-                        </div>
+                    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                        {{ session('success') }}
+                    </div>
                     @endif
 
                     <div class="overflow-x-auto">
@@ -37,59 +37,71 @@
                             </thead>
                             <tbody>
                                 @forelse($employees as $employee)
-                                    <tr>
-                                        <td class="py-2 px-4 border-b border-gray-200 dark:border-gray-700">
-                                            {{ $employee->id }}</td>
-                                        <td class="py-2 px-4 border-b border-gray-200 dark:border-gray-700">
-                                            {{ $employee->name }}</td>
-                                        <td class="py-2 px-4 border-b border-gray-200 dark:border-gray-700">
-                                            {{ $employee->email }}</td>
-                                        <td class="py-2 px-4 border-b border-gray-200 dark:border-gray-700">
-                                            <span
-                                                class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">
-                                                {{ $employee->role_name }}
-                                            </span>
-                                        </td>
-                                        <td class="py-2 px-4 border-b border-gray-200 dark:border-gray-700">
-                                            @if($employee->is_active)
-                                                <span
-                                                    class="bg-green-500 text-white text-xs font-medium px-2.5 py-0.5 rounded dark:bg-green-600">
-                                                    Активен
-                                                </span>
-                                            @else
-                                                <span
-                                                    class="bg-red-500 text-white text-xs font-medium px-2.5 py-0.5 rounded dark:bg-red-600">
-                                                    Неактивен
-                                                </span>
-                                            @endif
-                                        </td>
-                                        <td class="py-2 px-4 border-b border-gray-200 dark:border-gray-700">
-                                            <div class="flex space-x-2">
-                                                <a href="{{ route('admin.employees.show', $employee) }}"
-                                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-sm">
-                                                    Просмотр
-                                                </a>
-                                                <a href="{{ route('admin.employees.edit', $employee) }}"
-                                                    class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded text-sm">
-                                                    Редактировать
-                                                </a>
-                                                <form action="{{ route('admin.employees.destroy', $employee) }}"
-                                                    method="POST" class="inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit"
-                                                        class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm"
-                                                        onclick="return confirm('Вы уверены?')">
-                                                        Удалить
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                <tr>
+                                    <td class="py-2 px-4 border-b border-gray-200 dark:border-gray-700">
+                                        {{ $employee->id }}
+                                    </td>
+                                    <td class="py-2 px-4 border-b border-gray-200 dark:border-gray-700">
+                                        {{ $employee->name }}
+                                    </td>
+                                    <td class="py-2 px-4 border-b border-gray-200 dark:border-gray-700">
+                                        {{ $employee->email }}
+                                    </td>
+                                    <td class="py-2 px-4 border-b border-gray-200 dark:border-gray-700">
+                                        {{ match($employee->role) {
+                                                'cook' => '👨‍🍳 ' . $employee->role_name,
+                                                'waiter' => '🍽️ ' . $employee->role_name,
+                                                'hostess' => '👋 ' . $employee->role_name,
+                                                'bartender' => '🍸 ' . $employee->role_name,
+                                                'admin' => '👔 ' . $employee->role_name,
+                                                default => $employee->role_name,
+                                            } }}
+                                    </td>
+                                    <td class="py-2 px-4 border-b border-gray-200 dark:border-gray-700">
+                                        <!-- Для дебага -->
+                                        <!-- is_active value: {{ $employee->is_active }}, type: {{ gettype($employee->is_active) }} -->
+
+                                        @if($employee->is_active == 't' || $employee->is_active == 1 || $employee->is_active === true)
+                                        <span class="bg-green-500 text-white text-xs font-medium px-2.5 py-0.5 rounded dark:bg-green-600">
+                                            Активен
+                                        </span>
+                                        @elseif($employee->is_active == 'f' || $employee->is_active == 0 || $employee->is_active === false)
+                                        <span class="bg-red-500 text-white text-xs font-medium px-2.5 py-0.5 rounded dark:bg-red-600">
+                                            Неактивен
+                                        </span>
+                                        @else
+                                        <span class="bg-gray-500 text-white text-xs font-medium px-2.5 py-0.5 rounded">
+                                            Неизвестно ({{ $employee->is_active }})
+                                        </span>
+                                        @endif
+                                    </td>
+                                    <td class="py-2 px-4 border-b border-gray-200 dark:border-gray-700">
+                                        <div class="flex space-x-2">
+                                            <a href="{{ route('admin.employees.show', $employee) }}"
+                                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-sm">
+                                                Просмотр
+                                            </a>
+                                            <a href="{{ route('admin.employees.edit', $employee) }}"
+                                                class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded text-sm">
+                                                Редактировать
+                                            </a>
+                                            <form action="{{ route('admin.employees.destroy', $employee) }}"
+                                                method="POST" class="inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                    class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm"
+                                                    onclick="return confirm('Вы уверены?')">
+                                                    Удалить
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
                                 @empty
-                                    <tr>
-                                        <td colspan="6" class="py-4 px-4 text-center">Сотрудники не найдены</td>
-                                    </tr>
+                                <tr>
+                                    <td colspan="6" class="py-4 px-4 text-center">Сотрудники не найдены</td>
+                                </tr>
                                 @endforelse
                             </tbody>
                         </table>

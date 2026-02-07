@@ -26,6 +26,10 @@ Route::middleware('auth')->group(function () {
     // === Графики ===
     Route::get('/schedule/role', [ScheduleController::class, 'byRole'])->name('schedule.role');
     Route::get('/schedule/personal', [ScheduleController::class, 'personal'])->name('schedule.personal');
+    Route::middleware('admin')->group(function () {
+        Route::get('/schedule/edit', [ScheduleController::class, 'edit'])->name('schedule.edit');
+        Route::post('/schedule/update', [ScheduleController::class, 'update'])->name('schedule.update');
+    });
 
     // === Пожелания ===
     Route::get('/preferences/calendar', [PreferenceController::class, 'calendar'])->name('preferences.calendar');

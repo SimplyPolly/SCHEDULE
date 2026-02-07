@@ -105,6 +105,11 @@
 
     <div class="py-6">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
+            @php
+                $isRoleView = request()->routeIs('schedule.role');
+                $isPersonalView = request()->routeIs('schedule.personal');
+                $currentUserRole = auth()->user()->role ?? null;
+            @endphp
 
             <!-- Навигация по периодам -->
             <div class="flex justify-between items-center mb-6 bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
@@ -186,7 +191,15 @@
                                 </thead>
                                 <tbody>
                                     @foreach(['cook', 'waiter', 'hostess', 'bartender', 'admin'] as $role)
-                                        @if(auth()->user()->role !== 'admin' && $role !== auth()->user()->role)
+                                        {{-- 
+                                            Невидимые роли:
+                                            - для не-админа: всё, что не его роль
+                                            - для админа на вкладках "график роли" и "личный график": только его роль
+                                        --}}
+                                        @if($currentUserRole !== 'admin' && $role !== $currentUserRole)
+                                            @continue
+                                        @endif
+                                        @if($currentUserRole === 'admin' && ($isRoleView || $isPersonalView) && $role !== $currentUserRole)
                                             @continue
                                         @endif
                                         <tr>
@@ -211,7 +224,20 @@
                                                         <!-- Утро -->
                                                         @if(isset($schedule[$dateStr][$role]['morning']) && count($schedule[$dateStr][$role]['morning']) > 0)
                                                             <div class="shift-block shift-morning">
-                                                                <div class="shift-header">🌅 Утро</div>
+                                                                <div class="shift-header flex items-center justify-between">
+                                                                    <span>🌅 Утро</span>
+                                                                    @if(auth()->user()->isAdmin())
+                                                                        <a href="{{ route('schedule.edit', [
+                                                                            'date' => $dateStr,
+                                                                            'role' => $role,
+                                                                            'shift' => 'morning',
+                                                                            'redirect_to' => request()->fullUrl(),
+                                                                        ]) }}"
+                                                                           class="text-[11px] text-blue-600 dark:text-blue-300 underline">
+                                                                            Править
+                                                                        </a>
+                                                                    @endif
+                                                                </div>
                                                                 <ul class="employee-list">
                                                                     @foreach($schedule[$dateStr][$role]['morning'] as $person)
                                                                         <li class="employee-item">{{ $person['name'] }}</li>
@@ -223,7 +249,20 @@
                                                         <!-- День -->
                                                         @if(isset($schedule[$dateStr][$role]['day']) && count($schedule[$dateStr][$role]['day']) > 0)
                                                             <div class="shift-block shift-day">
-                                                                <div class="shift-header">☀️ День</div>
+                                                                <div class="shift-header flex items-center justify-between">
+                                                                    <span>☀️ День</span>
+                                                                    @if(auth()->user()->isAdmin())
+                                                                        <a href="{{ route('schedule.edit', [
+                                                                            'date' => $dateStr,
+                                                                            'role' => $role,
+                                                                            'shift' => 'day',
+                                                                            'redirect_to' => request()->fullUrl(),
+                                                                        ]) }}"
+                                                                           class="text-[11px] text-blue-600 dark:text-blue-300 underline">
+                                                                            Править
+                                                                        </a>
+                                                                    @endif
+                                                                </div>
                                                                 <ul class="employee-list">
                                                                     @foreach($schedule[$dateStr][$role]['day'] as $person)
                                                                         <li class="employee-item">{{ $person['name'] }}</li>
@@ -235,7 +274,20 @@
                                                         <!-- Ночь -->
                                                         @if(isset($schedule[$dateStr][$role]['night']) && count($schedule[$dateStr][$role]['night']) > 0)
                                                             <div class="shift-block shift-night">
-                                                                <div class="shift-header">🌙 Ночь</div>
+                                                                <div class="shift-header flex items-center justify-between">
+                                                                    <span>🌙 Ночь</span>
+                                                                    @if(auth()->user()->isAdmin())
+                                                                        <a href="{{ route('schedule.edit', [
+                                                                            'date' => $dateStr,
+                                                                            'role' => $role,
+                                                                            'shift' => 'night',
+                                                                            'redirect_to' => request()->fullUrl(),
+                                                                        ]) }}"
+                                                                           class="text-[11px] text-blue-600 dark:text-blue-300 underline">
+                                                                            Править
+                                                                        </a>
+                                                                    @endif
+                                                                </div>
                                                                 <ul class="employee-list">
                                                                     @foreach($schedule[$dateStr][$role]['night'] as $person)
                                                                         <li class="employee-item">{{ $person['name'] }}</li>
@@ -253,6 +305,7 @@
                                                     @else
                                                         <div class="empty-cell">—</div>
                                                     @endif
+
                                                 </td>
                                             @endforeach
                                         </tr>

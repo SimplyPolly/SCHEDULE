@@ -161,10 +161,6 @@ class ScheduleController extends \Illuminate\Routing\Controller
     {
         $user = Auth::user();
 
-        if ($user->role === 'admin') {
-            return redirect()->route('dashboard');
-        }
-
         $periodStartDate = $request->has('period_start')
             ? Carbon::parse($request->period_start)->startOfWeek()
             : now()->startOfWeek();
@@ -248,5 +244,101 @@ class ScheduleController extends \Illuminate\Routing\Controller
 
         return redirect()->back()
             ->with('success', 'График успешно сгенерирован с учетом приоритета пожеланий!');
+    }
+
+    // Форма ручного редактирования смены (только админ)
+    public function edit(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user || $user->role !== 'admin') {
+            abort(403);
+        }
+
+        $roles = array_keys(Employee::ROLES);
+
+        $validated = $request->validate([
+            'date' => ['required', 'date'],
+            'role' => ['required', 'string', 'in:' . implode(',', $roles)],
+            'shift' => ['required', 'string', 'in:morning,day,night'],
+        ]);
+
+        $date = Carbon::parse($validated['date'])->toDateString();
+        $role = $validated['role'];
+        $shift = $validated['shift'];
+
+        // Список активных сотрудников этой роли
+        $employees = Employee::active()
+            ->byRole($role)
+            ->orderBy('name')
+            ->get();
+
+        // Уже назначенные сотрудники на эту дату/смену/роль
+        $assignedEmployeeIds = ShiftAssignment::where('date', $date)
+            ->where('shift_type', $shift)
+            ->whereHas('employee', fn($q) => $q->where('role', $role))
+            ->pluck('employee_id')
+            ->toArray();
+
+        $roleName = Employee::ROLES[$role] ?? $role;
+
+        $redirectTo = $request->input('redirect_to', url()->previous());
+
+        return view('schedule.edit', compact(
+            'date',
+            'role',
+            'shift',
+            'employees',
+            'assignedEmployeeIds',
+            'roleName',
+            'redirectTo'
+        ));
+    }
+
+    // Сохранение ручных правок смены (только админ)
+    public function update(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user || $user->role !== 'admin') {
+            abort(403);
+        }
+
+        $roles = array_keys(Employee::ROLES);
+
+        $validated = $request->validate([
+            'date' => ['required', 'date'],
+            'role' => ['required', 'string', 'in:' . implode(',', $roles)],
+            'shift' => ['required', 'string', 'in:morning,day,night'],
+            'employees' => ['nullable', 'array'],
+            'employees.*' => ['integer', 'exists:employees,id'],
+            'redirect_to' => ['nullable', 'url'],
+        ]);
+
+        $date = Carbon::parse($validated['date'])->toDateString();
+        $role = $validated['role'];
+        $shift = $validated['shift'];
+        $employeeIds = $validated['employees'] ?? [];
+
+        // Удаляем старые назначения по этой дате/роли/смене
+        ShiftAssignment::where('date', $date)
+            ->where('shift_type', $shift)
+            ->whereHas('employee', fn($q) => $q->where('role', $role))
+            ->delete();
+
+        // Создаем новые назначения
+        foreach ($employeeIds as $employeeId) {
+            ShiftAssignment::create([
+                'employee_id' => $employeeId,
+                'date' => $date,
+                'shift_type' => $shift,
+                'is_approved' => true,
+            ]);
+        }
+
+        $redirectTo = $validated['redirect_to'] ?? route('dashboard', [
+            'period_start' => Carbon::parse($date)->startOfWeek()->format('Y-m-d'),
+        ]);
+
+        return redirect($redirectTo)
+            ->with('success', 'График успешно обновлён.');
     }
 }

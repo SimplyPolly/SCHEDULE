@@ -13,6 +13,13 @@
                 <!-- Navigation Links -->
 
                 <!-- Графики -->
+                @auth
+                    @if(Auth::user()->isAdmin())
+                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                            {{ __('Общий график') }}
+                        </x-nav-link>
+                    @endif
+                @endauth
 
                 <x-nav-link :href="route('schedule.role')" :active="request()->routeIs('schedule.role')">
                     {{ __('График моей роли') }}
@@ -93,9 +100,33 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
+            @auth
+                @if(Auth::user()->isAdmin())
+                    <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                        {{ __('Общий график') }}
+                    </x-responsive-nav-link>
+                @endif
+            @endauth
+
+            <x-responsive-nav-link :href="route('schedule.role')" :active="request()->routeIs('schedule.role')">
+                {{ __('График моей роли') }}
             </x-responsive-nav-link>
+
+            <x-responsive-nav-link :href="route('schedule.personal')" :active="request()->routeIs('schedule.personal')">
+                {{ __('Мой график') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link :href="route('preferences.calendar')" :active="request()->routeIs('preferences.calendar')">
+                {{ __('Мои пожелания') }}
+            </x-responsive-nav-link>
+
+            @auth
+                @if(Auth::user()->isAdmin())
+                    <x-responsive-nav-link :href="route('admin.employees.index')" :active="request()->routeIs('admin.employees.*')">
+                        {{ __('Сотрудники') }}
+                    </x-responsive-nav-link>
+                @endif
+            @endauth
         </div>
 
         <!-- Responsive Settings Options -->
