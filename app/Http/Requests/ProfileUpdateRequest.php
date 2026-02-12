@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\User;
+use App\Models\Employee; // Изменено с User на Employee
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -23,8 +23,23 @@ class ProfileUpdateRequest extends FormRequest
                 'lowercase',
                 'email',
                 'max:255',
-                Rule::unique(User::class)->ignore($this->user()->id),
+                Rule::unique(Employee::class)->ignore($this->user()->id),
             ],
+            'phone' => ['nullable', 'string', 'max:20', 'regex:/^[\d\s\+\-\(\)]+$/'], // Валидация для телефона
+            'telegram' => ['nullable', 'string', 'max:100', 'regex:/^[@a-zA-Z0-9_\.\:\/]+$/'], // Валидация для Telegram
+        ];
+    }
+
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'phone.regex' => 'Пожалуйста, введите корректный номер телефона',
+            'telegram.regex' => 'Пожалуйста, введите корректный Telegram username или ссылку',
         ];
     }
 }

@@ -14,11 +14,11 @@
 
                 <!-- Графики -->
                 @auth
-                    @if(Auth::user()->isAdmin())
-                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                            {{ __('Общий график') }}
-                        </x-nav-link>
-                    @endif
+                @if(Auth::user()->isAdmin())
+                <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                    {{ __('Общий график') }}
+                </x-nav-link>
+                @endif
                 @endauth
 
                 <x-nav-link :href="route('schedule.role')" :active="request()->routeIs('schedule.role')">
@@ -34,13 +34,19 @@
                     {{ __('Мои пожелания') }}
                 </x-nav-link>
 
-                <!-- Сотрудники - только для админов -->
+                <!-- Только для админов -->
                 @auth
-                    @if(Auth::user()->isAdmin())
-                        <x-nav-link :href="route('admin.employees.index')" :active="request()->routeIs('admin.employees.*')">
-                            {{ __('Сотрудники') }}
-                        </x-nav-link>
-                    @endif
+                @if(Auth::user()->isAdmin())
+                <!-- Сотрудники -->
+                <x-nav-link :href="route('admin.employees.index')" :active="request()->routeIs('admin.employees.*')">
+                    {{ __('Сотрудники') }}
+                </x-nav-link>
+
+                <!-- Настройки алгоритма -->
+                <x-nav-link :href="route('algorithm.settings')" :active="request()->routeIs('algorithm.settings') || request()->routeIs('algorithm.settings.update') || request()->routeIs('staff-requirements.*')">
+                    {{ __('Настройки алгоритма') }}
+                </x-nav-link>
+                @endif
                 @endauth
             </div>
 
@@ -65,7 +71,7 @@
 
                     <x-slot name="content">
                         <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
+                            {{ __('Профиль') }}
                         </x-dropdown-link>
 
                         <!-- Authentication -->
@@ -74,7 +80,7 @@
 
                             <x-dropdown-link :href="route('logout')" onclick="event.preventDefault();
                                                 this.closest('form').submit();">
-                                {{ __('Log Out') }}
+                                {{ __('Выйти') }}
                             </x-dropdown-link>
                         </form>
                     </x-slot>
@@ -101,11 +107,11 @@
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
             @auth
-                @if(Auth::user()->isAdmin())
-                    <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Общий график') }}
-                    </x-responsive-nav-link>
-                @endif
+            @if(Auth::user()->isAdmin())
+            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                {{ __('Общий график') }}
+            </x-responsive-nav-link>
+            @endif
             @endauth
 
             <x-responsive-nav-link :href="route('schedule.role')" :active="request()->routeIs('schedule.role')">
@@ -121,11 +127,11 @@
             </x-responsive-nav-link>
 
             @auth
-                @if(Auth::user()->isAdmin())
-                    <x-responsive-nav-link :href="route('admin.employees.index')" :active="request()->routeIs('admin.employees.*')">
-                        {{ __('Сотрудники') }}
-                    </x-responsive-nav-link>
-                @endif
+            @if(Auth::user()->isAdmin())
+            <x-responsive-nav-link :href="route('admin.employees.index')" :active="request()->routeIs('admin.employees.*')">
+                {{ __('Сотрудники') }}
+            </x-responsive-nav-link>
+            @endif
             @endauth
         </div>
 
@@ -147,7 +153,7 @@
 
                     <x-responsive-nav-link :href="route('logout')" onclick="event.preventDefault();
                                         this.closest('form').submit();">
-                        {{ __('Log Out') }}
+                        {{ __('Выйти') }}
                     </x-responsive-nav-link>
                 </form>
             </div>

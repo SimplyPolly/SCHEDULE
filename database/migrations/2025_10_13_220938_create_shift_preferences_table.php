@@ -24,8 +24,15 @@ return new class extends Migration
                 'avoid_day',
                 'avoid_night'
             ]);
-            $table->timestamp('submitted_at'); // для приоритета!
+            $table->timestamp('submitted_at')->useCurrent(); // для приоритета!
             $table->timestamps();
+            
+            // Составной уникальный индекс для предотвращения дублирования
+            $table->unique(['employee_id', 'date']);
+            
+            // Индексы для оптимизации запросов
+            $table->index('date');
+            $table->index(['employee_id', 'date', 'type']);
         });
     }
 

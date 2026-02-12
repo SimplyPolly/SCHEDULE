@@ -46,14 +46,20 @@ class EmployeeSeeder extends Seeder
         $this->command->info('   - Официанты, хостес, бармены: короткие смены (утро 09:00-17:00, день 13:00-21:00, ночь 19:00-03:00)');
     }
 
-    private function makeEmployee(string $role, string $name, int $i): array
+    private function makeEmployee(string $role, string $name, int $index): array
     {
+        $phone = '+7 (999) ' . str_pad(100 + $index, 6, '0', STR_PAD_LEFT);
+        $telegram = '@' . strtolower($role) . $index;
+
         return [
             'name' => $name,
-            'email' => "$role$i@example.com",
+            'email' => strtolower($role) . $index . '@restaurant.com',
             'password' => Hash::make('password'),
+            'phone' => $phone,
+            'telegram' => $telegram,
             'role' => $role,
             'is_active' => true,
+            'remember_token' => null,
             'created_at' => now(),
             'updated_at' => now(),
         ];
